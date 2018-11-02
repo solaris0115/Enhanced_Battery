@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
+	<!--  ChargeBack_Battery_Prototype  -->
 	<ThingDef ParentName="BuildingBase">
 		<defName>ChargeBack_Battery_Prototype</defName>
 		<label>ChargeBack Battery Prototype</label>
 		<description>Stores electricity for later use. Charged batteries explode when exposed to rain or fire.</description>
 		<thingClass>EnhancedBattery.Building_ChargeBackBattery</thingClass>
 		<graphicData>
-			<texPath>Things/Building/Power/ChargeBack_Battery2</texPath>
+			<texPath>Things/Building/Power/ChargeBack_Battery_Proto</texPath>
 			<graphicClass>Graphic_Multi</graphicClass>
 			<drawSize>(2,3)</drawSize>
 			<damageData>
@@ -37,7 +38,7 @@
 		<size>(1,2)</size>
 		<costList>
 			<Steel>100</Steel>
-			<ComponentIndustrial>6</ComponentIndustrial>
+			<ComponentIndustrial>4</ComponentIndustrial>
 		</costList>
 		<comps>		
 			<li Class="EnhancedBattery.CompProperties_ChargeBackBattery">
@@ -66,15 +67,15 @@
 			<li>Batteries</li>
 		</researchPrerequisites>
 	</ThingDef>
-	
-	
-		<ThingDef ParentName="BuildingBase">
+
+	<!--  ChargeBack_Battery  -->
+	<ThingDef ParentName="BuildingBase">
 		<defName>ChargeBack_Battery</defName>
 		<label>ChargeBack Battery</label>
 		<description>Stores electricity for later use. Charged batteries explode when exposed to rain or fire.</description>
 		<thingClass>EnhancedBattery.Building_ChargeBackBattery</thingClass>
 		<graphicData>
-			<texPath>Things/Building/Power/ChargeBack_Battery2</texPath>
+			<texPath>Things/Building/Power/ChargeBack_Battery</texPath>
 			<graphicClass>Graphic_Multi</graphicClass>
 			<drawSize>(2,3)</drawSize>
 			<damageData>
@@ -104,8 +105,8 @@
 		</statBases>
 		<size>(1,2)</size>
 		<costList>
-			<Steel>150</Steel>
-			<ComponentIndustrial>8</ComponentIndustrial>
+			<Steel>120</Steel>
+			<ComponentIndustrial>6</ComponentIndustrial>
 		</costList>
 		<comps>		
 			<li Class="EnhancedBattery.CompProperties_ChargeBackBattery">
@@ -134,11 +135,72 @@
 		</researchPrerequisites>
 	</ThingDef>
 
+	<!--  SpeedCharge_Battery  -->
+	<ThingDef ParentName="BuildingBase">
+		<defName>SpeedCharge_Battery</defName>
+		<label>SpeedCharge Battery</label>
+		<description>Stores electricity for later use. Charged batteries explode when exposed to rain or fire.</description>
+		<thingClass>EnhancedBattery.Building_SpeedChargeBattery</thingClass>
+		<graphicData>
+			<texPath>Things/Building/Power/SpeedCharge_Battery</texPath>
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(2,3)</drawSize>
+			<damageData>
+				<cornerTL>Damage/Corner</cornerTL>
+				<cornerTR>Damage/Corner</cornerTR>
+				<cornerBL>Damage/Corner</cornerBL>
+				<cornerBR>Damage/Corner</cornerBR>
+			</damageData>
+		</graphicData>
+		<altitudeLayer>Building</altitudeLayer>
+		<passability>PassThroughOnly</passability>
+		<pathCost>70</pathCost>
+		<blockWind>true</blockWind>
+		<castEdgeShadows>true</castEdgeShadows>
+		<fillPercent>0.40</fillPercent>
+		<tickerType>Normal</tickerType>
+		<minifiedDef>MinifiedThing</minifiedDef>
+		<thingCategories>
+			<li>BuildingsPower</li>
+		</thingCategories>
+		<statBases>
+			<MaxHitPoints>170</MaxHitPoints>
+			<WorkToBuild>2000</WorkToBuild>
+			<Mass>20</Mass>
+			<Flammability>1.0</Flammability>
+			<Beauty>-10</Beauty>
+		</statBases>
+		<size>(1,2)</size>
+		<costList>
+			<Steel>120</Steel>
+			<Jade>20</Jade>
+			<ComponentIndustrial>6</ComponentIndustrial>
+		</costList>
+		<comps>		
+			<li Class="EnhancedBattery.CompProperties_ChargeBackBattery">
+				<compClass>EnhancedBattery.CompSpeedChargeBattery</compClass>
+				<storedEnergyMax>2000</storedEnergyMax>
+				<efficiency>1.8</efficiency>
+				<shortCircuitInRain>true</shortCircuitInRain>
+				<transmitsPower>true</transmitsPower>
+			</li>
+			<li Class="CompProperties_Breakdownable"/>		
+			<li Class="CompProperties_Flickable" />
+		</comps>
+		<terrainAffordanceNeeded>Medium</terrainAffordanceNeeded>
+		<designationCategory>Power</designationCategory>
+		<staticSunShadowHeight>0.2</staticSunShadowHeight>
+		<constructEffect>ConstructMetal</constructEffect>
+		<canOverlapZones>false</canOverlapZones>
+		<researchPrerequisites>
+			<li>Batteries</li>
+		</researchPrerequisites>
+	</ThingDef>
 	<!-- 충전량 N% 마다 발전 효율 증가 (차지백 배터리) -->
 	<!-- 충전량 N%이상이면  합선 방지 (안정화셀 배터리)-->
 	<!-- 충젼량이 낮을때 충전 효율이 낮아지는 전지(급속 충전 전지) -->
 	<!-- 온도를 흡수하여 충전하는 셀 -->
 	<!-- 풀차징시 온도를 방열하는 셀 -->
-	
-	
+
+
 </Defs>
