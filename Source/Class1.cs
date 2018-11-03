@@ -35,145 +35,9 @@ namespace EnhancedBattery
             yield break;
         }
     }
-    public class CompChargeBackPowerPlantPrototype :CompPowerTrader
-    {
-        protected CompChargeBackBatteryPrototype compChargeBackBatteryProt;
-        protected CompBreakdownable breakdownableComp;
-
-        public override void PostSpawnSetup(bool respawningAfterLoad)
-        {
-            base.PostSpawnSetup(respawningAfterLoad);
-            this.breakdownableComp = this.parent.GetComp<CompBreakdownable>();
-            if (base.Props.basePowerConsumption < 0f && !this.parent.IsBrokenDown() && FlickUtility.WantsToBeOn(this.parent))
-            {
-                base.PowerOn = true;
-            }
-            if(parent.GetComp<CompChargeBackBatteryPrototype>()!=null)
-            {
-                compChargeBackBatteryProt = parent.GetComp<CompChargeBackBatteryPrototype>();
-            }
-
-        }
-
-        public override void PostExposeData()
-        {
-            Thing thing = null;
-            if (Scribe.mode == LoadSaveMode.Saving && this.connectParent != null)
-            {
-                thing = this.connectParent.parent;
-            }
-            //Scribe_References.Look<Thing>(ref thing, "parentThing", false);
-            if (thing != null)
-            {
-                this.connectParent = ((ThingWithComps)thing).GetComp<CompPower>();
-            }
-            if (Scribe.mode == LoadSaveMode.PostLoadInit && this.connectParent != null)
-            {
-                this.ConnectToTransmitter(this.connectParent, true);
-            }
-        }
-        public override void CompTick()
-        {
-            base.CompTick();
-            this.UpdateDesiredPowerOutput();
-        }
-        public override void SetUpPowerVars()
-        {
-            base.SetUpPowerVars();
-            CompProperties_Power props = base.Props;
-            if (compChargeBackBatteryProt != null)
-            {
-                if (compChargeBackBatteryProt.StoredEnergyPct > 0.9)
-                {
-                    PowerOutput = -Props.basePowerConsumption;
-                    return;
-                }
-            }
-            PowerOutput = 0;
-        }
-        public virtual void UpdateDesiredPowerOutput()
-        {
-            if ((this.breakdownableComp != null && this.breakdownableComp.BrokenDown) || (this.flickableComp != null && !this.flickableComp.SwitchIsOn) || !base.PowerOn)
-            {
-                base.PowerOutput = 0f;
-                return;
-            }
-            if (compChargeBackBatteryProt != null)
-            {
-                if (compChargeBackBatteryProt.StoredEnergyPct > 0.9)
-                {
-                    PowerOutput = -Props.basePowerConsumption;
-                    return;
-                }
-            }
-            PowerOutput = 0;
-        }
-
-        public override string CompInspectStringExtra()
-        {
-            string str;
-            str = "PowerOutput".Translate() + ": " + this.PowerOutput.ToString("#####0") + " W";
-            return str;
-        }
-        public override IEnumerable<Gizmo> CompGetGizmosExtra()
-        {
-            yield break;
-        }
-    }
-
-    public class CompChargeBackPowerPlant : CompChargeBackPowerPlantPrototype
-    {
-        public float currentPowerEfficiency = 1.0f;
-
-        public override void PostSpawnSetup(bool respawningAfterLoad)
-        {
-            base.PostSpawnSetup(respawningAfterLoad);
-            currentPowerEfficiency = ((CompProperties_ChargeBackPowerPlant)Props).powerEfficiency;
-        }
-        public override void PostExposeData()
-        {
-            base.PostExposeData();
-            Scribe_Values.Look<float>(ref currentPowerEfficiency, "currentPowerEfficiency");
-        }
-
-        public override void CompTick()
-        {
-            base.CompTick();
-            int tempEff = (int)(compChargeBackBatteryProt.StoredEnergyPct * 100);
-            tempEff /= 10;
-            currentPowerEfficiency = ((float)tempEff) / 10+0.1f;
-            this.UpdateDesiredPowerOutput();
-        }
-
-        public override void UpdateDesiredPowerOutput()
-        {
-            if ((this.breakdownableComp != null && this.breakdownableComp.BrokenDown) || (this.flickableComp != null && !this.flickableComp.SwitchIsOn) || !base.PowerOn)
-            {
-                base.PowerOutput = 0f;
-                return;
-            }
-            if (compChargeBackBatteryProt != null)
-            {
-                PowerOutput = -(Props.basePowerConsumption * currentPowerEfficiency);
-                return;
-            }
-            PowerOutput = 0;
-        }
-
-        public override string CompInspectStringExtra()
-        {
-            string str;
-            str = "PowerOutput".Translate() + ": " + this.PowerOutput.ToString("#####0") + " W";
-            return str;
-        }
-        public override IEnumerable<Gizmo> CompGetGizmosExtra()
-        {
-            yield break;
-        }
-    }
     public class CompSpeedChargeBattery : CompPowerBattery
     {
-        private float chargeEfficiency = 0;
+        public float chargeEfficiency = 0;
 
         public new float AmountCanAccept
         {
@@ -271,9 +135,14 @@ namespace EnhancedBattery
                     " W"
                 });
             }
+            if (PowerNet == null)
+            {
+                return text+"\n" + "PowerNotConnected".Translate();
+            }
             string value = (this.PowerNet.CurrentEnergyGainRate() / CompPower.WattsToWattDaysPerTick).ToString("F0");
             string value2 = this.PowerNet.CurrentStoredEnergy().ToString("F0");
-            return text + "\n"+ "PowerConnectedRateStored".Translate(value, value2);
+
+            return text + "\n" + "PowerConnectedRateStored".Translate(value, value2);
         }
 
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
@@ -301,34 +170,353 @@ namespace EnhancedBattery
         }
     }
 
-    public class CompProperties_ChargeBackBattery : CompProperties_Battery
+    public class CompChargeBackPowerPlantPrototype :CompPowerTrader
     {
-        public float chargeEfficiency=0.5f;
-    }
-    public class CompProperties_ChargeBackPowerPlant : CompProperties_Power
-    {
-        public float powerEfficiency=1.0f;
-    }
+        protected CompPowerBattery compPowerBattery;
+        protected CompBreakdownable breakdownableComp;
 
+        public override void PostSpawnSetup(bool respawningAfterLoad)
+        {
+            base.PostSpawnSetup(respawningAfterLoad);
+            this.breakdownableComp = this.parent.GetComp<CompBreakdownable>();
+            if (base.Props.basePowerConsumption < 0f && !this.parent.IsBrokenDown() && FlickUtility.WantsToBeOn(this.parent))
+            {
+                base.PowerOn = true;
+            }
+            if(parent.GetComp<CompPowerBattery>()!=null)
+            {
+                compPowerBattery = parent.GetComp<CompPowerBattery>();
+            }
+        }
+
+        public override void PostExposeData()
+        {
+            Thing thing = null;
+            if (Scribe.mode == LoadSaveMode.Saving && this.connectParent != null)
+            {
+                thing = this.connectParent.parent;
+            }
+            //Scribe_References.Look<Thing>(ref thing, "parentThing", false);
+            if (thing != null)
+            {
+                this.connectParent = ((ThingWithComps)thing).GetComp<CompPower>();
+            }
+            if (Scribe.mode == LoadSaveMode.PostLoadInit && this.connectParent != null)
+            {
+                this.ConnectToTransmitter(this.connectParent, true);
+            }
+        }
+        public override void CompTick()
+        {
+            base.CompTick();
+            this.UpdateDesiredPowerOutput();
+        }
+        public override void SetUpPowerVars()
+        {
+            base.SetUpPowerVars();
+            CompProperties_Power props = base.Props;
+            if (compPowerBattery != null)
+            {
+                if (compPowerBattery.StoredEnergyPct > 0.9)
+                {
+                    PowerOutput = -Props.basePowerConsumption;
+                    return;
+                }
+            }
+            PowerOutput = 0;
+        }
+        public virtual void UpdateDesiredPowerOutput()
+        {
+            if ((this.breakdownableComp != null && this.breakdownableComp.BrokenDown) || (this.flickableComp != null && !this.flickableComp.SwitchIsOn) || !base.PowerOn)
+            {
+                base.PowerOutput = 0f;
+                return;
+            }
+            if (compPowerBattery != null)
+            {
+                if (compPowerBattery.StoredEnergyPct > 0.8)
+                {
+                    PowerOutput = -Props.basePowerConsumption;
+                    return;
+                }
+            }
+            PowerOutput = 0;
+        }
+
+        public override string CompInspectStringExtra()
+        {
+            if (compPowerBattery != null)
+            {
+                if (compPowerBattery.PowerNet == null)
+                {
+                    return string.Empty;
+                }
+            }
+            else
+            {
+                return string.Empty;
+            }
+            string str;
+            str = "PowerOutput".Translate() + ": " + this.PowerOutput.ToString("#####0") + " W";
+            return str;
+        }
+        public override IEnumerable<Gizmo> CompGetGizmosExtra()
+        {
+            yield break;
+        }
+    }
+    public class CompChargeBackPowerPlant : CompChargeBackPowerPlantPrototype
+    {
+        public float currentPowerEfficiency = 1.0f;
+
+        public override void PostSpawnSetup(bool respawningAfterLoad)
+        {
+            base.PostSpawnSetup(respawningAfterLoad);
+            currentPowerEfficiency = 0;
+        }
+        public override void PostExposeData()
+        {
+            base.PostExposeData();
+            Scribe_Values.Look<float>(ref currentPowerEfficiency, "currentPowerEfficiency");
+        }
+        public override void UpdateDesiredPowerOutput()
+        {
+            if ((this.breakdownableComp != null && this.breakdownableComp.BrokenDown) || (this.flickableComp != null && !this.flickableComp.SwitchIsOn) || !base.PowerOn)
+            {
+                base.PowerOutput = 0f;
+                return;
+            }
+            if (compPowerBattery != null)
+            {
+                if(compPowerBattery.StoredEnergyPct>0.99)
+                {
+                    currentPowerEfficiency = 1;
+                }
+                else
+                {
+                    int tempEff = (int)(compPowerBattery.StoredEnergyPct * 100);
+                    tempEff /= 10;
+                    currentPowerEfficiency = ((float)tempEff) / 10;
+                }
+                PowerOutput = -(Props.basePowerConsumption * currentPowerEfficiency);
+                return;
+            }
+            PowerOutput = 0;
+        }
+    }
+    public class CompSpeedChargeBackPowerPlant : CompChargeBackPowerPlant
+    {
+        public override void UpdateDesiredPowerOutput()
+        {
+            if ((this.breakdownableComp != null && this.breakdownableComp.BrokenDown) || (this.flickableComp != null && !this.flickableComp.SwitchIsOn) || !base.PowerOn)
+            {
+                base.PowerOutput = 0f;
+                return;
+            }
+            if (compPowerBattery != null)
+            {
+                currentPowerEfficiency = (1 - compPowerBattery.StoredEnergyPct);
+                PowerOutput = -(Props.basePowerConsumption * currentPowerEfficiency);
+                return;
+            }
+            PowerOutput = 0;
+        }
+    }
+    public class CompResonancePowerPlant : CompChargeBackPowerPlant
+    {
+        public static float range = 2;
+        public float additionalEfficiency=0.2f;
+        HashSet<Thing> linkedBuildings = new HashSet<Thing>();
+
+        public static HashSet<CompResonancePowerPlant> nearDrowingList = new HashSet<CompResonancePowerPlant>();
+
+        public override void PostSpawnSetup(bool respawningAfterLoad)
+        {
+            this.breakdownableComp = this.parent.GetComp<CompBreakdownable>();
+            if (base.Props.basePowerConsumption < 0f && !this.parent.IsBrokenDown() && FlickUtility.WantsToBeOn(this.parent))
+            {
+                base.PowerOn = true;
+            }
+            if (parent.GetComp<CompPowerBattery>() != null)
+            {
+                compPowerBattery = parent.GetComp<CompPowerBattery>();
+            }
+            currentPowerEfficiency = 1;
+            additionalEfficiency = ((CompPropertie_ResonancePowerPlant)Props).additionalEfficiency;
+            linkedBuildings.Add(parent);
+            LinkToNearbyBuildings();
+            /*Log.Message(parent.def.label + ": " + parent.GetHashCode() + " List");
+            foreach(Thing t in linkedBuildings)
+            {
+                Log.Message(t.def.label + ": " + t.GetHashCode());
+            }*/
+
+        }
+        public override void PostDeSpawn(Map map)
+        {
+            UnlinkAll();
+        }
+        public bool AddLink(Thing thing)
+        {
+            if(linkedBuildings.Add(thing))
+            {
+                currentPowerEfficiency += additionalEfficiency;
+                return true;
+            }
+            return false;
+        }
+        public bool RemoveLink(Thing thing)
+        {
+            if(linkedBuildings.Remove(thing))
+            {
+                currentPowerEfficiency -= additionalEfficiency;
+                return true;
+            }
+            return false;
+        }
+
+        public void LinkToNearbyBuildings()
+        {
+            foreach (Thing thing in GenRadial.RadialDistinctThingsAround(parent.Position, parent.Map, range, true))
+            {
+                CompResonancePowerPlant comp = thing.TryGetComp<CompResonancePowerPlant>();
+                if (comp != null)
+                {
+                    if (comp.AddLink(parent))
+                    {
+                        linkedBuildings.Add(comp.parent);
+                        currentPowerEfficiency += additionalEfficiency;
+                    }
+                }
+            }
+            foreach (Thing thing in GenRadial.RadialDistinctThingsAround(parent.Position+parent.Rotation.FacingCell, parent.Map, range, true))
+            {
+                CompResonancePowerPlant comp = thing.TryGetComp<CompResonancePowerPlant>();
+                if (comp != null)
+                {
+                    if (comp.AddLink(parent))
+                    {
+                        linkedBuildings.Add(comp.parent);
+                        currentPowerEfficiency += additionalEfficiency;
+                    }
+                }
+            }
+        }
+        public void UnlinkAll()
+        {
+            List<Thing> tmpList = new List<Thing>(linkedBuildings);
+            for (int index = 0; index < tmpList.Count; index++)
+            {
+                tmpList[index].TryGetComp<CompResonancePowerPlant>().RemoveLink(parent);
+            }
+            linkedBuildings.Clear();
+        }
+        public override void UpdateDesiredPowerOutput()
+        {
+            if ((this.breakdownableComp != null && this.breakdownableComp.BrokenDown) || (this.flickableComp != null && !this.flickableComp.SwitchIsOn) || !base.PowerOn)
+            {
+                base.PowerOutput = 0f;
+                return;
+            }
+            if (compPowerBattery != null)
+            {
+                PowerOutput = -(Props.basePowerConsumption * currentPowerEfficiency);
+                return;
+            }
+            PowerOutput = 0;
+        }
+        public override string CompInspectStringExtra()
+        {
+            if(compPowerBattery!=null)
+            {
+                if (compPowerBattery.PowerNet == null)
+                {
+                    return string.Empty;
+                }
+            }
+            else
+            {
+                return string.Empty;
+            }
+            string str;
+            str = "PowerOutput".Translate() + ": " + (-Props.basePowerConsumption * currentPowerEfficiency).ToString("#####0") + " W";
+            return str;
+            
+        }
+        public override void PostDrawExtraSelectionOverlays()
+        {
+            foreach (Thing t in linkedBuildings)
+            {
+                if (t.TryGetComp<CompResonancePowerPlant>().CanBeActive)
+                {
+                    GenDraw.DrawLineBetween(this.parent.TrueCenter(), t.TrueCenter());
+                }
+                else
+                {
+                    GenDraw.DrawLineBetween(this.parent.TrueCenter(), t.TrueCenter(), CompAffectedByFacilities.InactiveFacilityLineMat);
+                }
+            }
+        }
+        public bool CanBeActive
+        {
+            get
+            {
+                CompPowerTrader compPowerTrader = this.parent.TryGetComp<CompPowerTrader>();
+                return compPowerTrader == null || compPowerTrader.PowerOn;
+            }
+        }
+        public static void DrawLinesToPotentialThingsToLinkTo(ThingDef myDef, IntVec3 myPos, Rot4 myRot, Map map)
+        {
+            nearDrowingList.Clear();
+            Vector3 pointingPos = GenThing.TrueCenter(myPos, myRot, myDef.size, myDef.Altitude);
+            foreach (Thing thing in GenRadial.RadialDistinctThingsAround(myPos, map, range, true))
+            {
+                CompResonancePowerPlant comp = thing.TryGetComp<CompResonancePowerPlant>();
+                if (comp != null)
+                {
+                    nearDrowingList.Add(comp);
+                }
+            }
+            foreach (Thing thing in GenRadial.RadialDistinctThingsAround(myPos+myRot.FacingCell, map, range, true))
+            {
+                CompResonancePowerPlant comp = thing.TryGetComp<CompResonancePowerPlant>();
+                if (comp != null)
+                {
+                    nearDrowingList.Add(comp);
+                }
+            }
+            foreach (CompResonancePowerPlant comp in nearDrowingList)
+            {
+                if (comp.CanBeActive)
+                {
+                    GenDraw.DrawLineBetween(pointingPos, comp.parent.TrueCenter());
+                }
+                else
+                {
+                    GenDraw.DrawLineBetween(pointingPos, comp.parent.TrueCenter(), CompAffectedByFacilities.InactiveFacilityLineMat);
+                }
+            }
+        }
+    }
 
     [StaticConstructorOnStartup]
     public class Building_ChargeBackBattery : Building
     {
-        private int ticksToExplode;
+        public int ticksToExplode;
 
-        private Sustainer wickSustainer;
+        public Sustainer wickSustainer;
 
-        private static readonly Vector2 BarSize = new Vector2(1.3f, 0.4f);
+        public static readonly Vector2 BarSize = new Vector2(1.3f, 0.4f);
 
-        private const float MinEnergyToExplode = 500f;
+        public const float MinEnergyToExplode = 500f;
 
-        private const float EnergyToLoseWhenExplode = 400f;
+        public const float EnergyToLoseWhenExplode = 400f;
 
-        private const float ExplodeChancePerDamage = 0.05f;
+        public const float ExplodeChancePerDamage = 0.05f;
 
-        private static readonly Material BatteryBarFilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.9f, 0.85f, 0.2f), false);
+        public static readonly Material BatteryBarFilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.9f, 0.85f, 0.2f), false);
 
-        private static readonly Material BatteryBarUnfilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.3f, 0.3f, 0.3f), false);
+        public static readonly Material BatteryBarUnfilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.3f, 0.3f, 0.3f), false);
 
         public override void ExposeData()
         {
@@ -339,6 +527,15 @@ namespace EnhancedBattery
         public override void Draw()
         {
             base.Draw();
+            DrawEnergyBar();
+            if (this.ticksToExplode > 0 && base.Spawned)
+            {
+                base.Map.overlayDrawer.DrawOverlay(this, OverlayTypes.BurningWick);
+            }
+        }
+
+        public virtual void DrawEnergyBar()
+        {
             CompPowerBattery comp = base.GetComp<CompPowerBattery>();
             GenDraw.FillableBarRequest r = default(GenDraw.FillableBarRequest);
             r.center = this.DrawPos + Vector3.up * 0.1f;
@@ -351,10 +548,6 @@ namespace EnhancedBattery
             rotation.Rotate(RotationDirection.Clockwise);
             r.rotation = rotation;
             GenDraw.DrawFillableBar(r);
-            if (this.ticksToExplode > 0 && base.Spawned)
-            {
-                base.Map.overlayDrawer.DrawOverlay(this, OverlayTypes.BurningWick);
-            }
         }
 
         public override void Tick()
@@ -398,89 +591,124 @@ namespace EnhancedBattery
         }
     }
     [StaticConstructorOnStartup]
-    public class Building_SpeedChargeBattery : Building
+    public class Building_SpeedChargeBattery : Building_ChargeBackBattery
     {
-        private int ticksToExplode;
-
-        private Sustainer wickSustainer;
-
-        private static readonly Vector2 BarSize = new Vector2(1.3f, 0.4f);
-
-        private const float MinEnergyToExplode = 500f;
-
-        private const float EnergyToLoseWhenExplode = 400f;
-
-        private const float ExplodeChancePerDamage = 0.05f;
-
-        private static readonly Material BatteryBarFilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.9f, 0.85f, 0.2f), false);
-
-        private static readonly Material BatteryBarUnfilledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.3f, 0.3f, 0.3f), false);
-
-        public override void ExposeData()
+        public override void DrawEnergyBar()
         {
-            base.ExposeData();
-            Scribe_Values.Look<int>(ref this.ticksToExplode, "ticksToExplode", 0, false);
-        }
-
-        public override void Draw()
-        {
-            base.Draw();
             CompSpeedChargeBattery comp = base.GetComp<CompSpeedChargeBattery>();
             GenDraw.FillableBarRequest r = default(GenDraw.FillableBarRequest);
             r.center = this.DrawPos + Vector3.up * 0.1f;
             r.size = Building_SpeedChargeBattery.BarSize;
             r.fillPercent = comp.StoredEnergy / comp.Props.storedEnergyMax;
-            r.filledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.15f+comp.StoredEnergyPct, 1.5f-comp.StoredEnergyPct, 1.2f - comp.StoredEnergyPct), false);
+            r.filledMat = SolidColorMaterials.SimpleSolidColorMaterial(new Color(0.25f + comp.StoredEnergyPct, 1.2f - comp.StoredEnergyPct * 1.2f, 1f - comp.StoredEnergyPct), false);
             r.unfilledMat = BatteryBarUnfilledMat;
             r.margin = 0.15f;
             Rot4 rotation = base.Rotation;
             rotation.Rotate(RotationDirection.Clockwise);
             r.rotation = rotation;
             GenDraw.DrawFillableBar(r);
-            if (this.ticksToExplode > 0 && base.Spawned)
+        }
+    }
+
+    public class CompPropertie_ResonancePowerPlant : CompProperties_Power
+    {
+        public float additionalEfficiency = 0.2f;
+        public float range = 2;
+        public override void ResolveReferences(ThingDef parentDef)
+        {
+            CompResonancePowerPlant.range = range;
+        }
+    }
+
+    public class PlaceWorker_ShowResonanceLink : PlaceWorker
+    {
+        public override void DrawGhost(ThingDef def, IntVec3 center, Rot4 rot, Color ghostCol)
+        {
+            Map currentMap = Find.CurrentMap;
+            if (def.HasComp(typeof(CompResonancePowerPlant)))
             {
-                base.Map.overlayDrawer.DrawOverlay(this, OverlayTypes.BurningWick);
+                CompResonancePowerPlant.DrawLinesToPotentialThingsToLinkTo(def, center, rot, currentMap);
             }
         }
+    }
 
-        public override void Tick()
+
+    public class DamageWorker_Void : DamageWorker_AddInjury
+    {
+        protected override BodyPartRecord ChooseHitPart(DamageInfo dinfo, Pawn pawn)
         {
-            base.Tick();
-            if (this.ticksToExplode > 0)
+            return pawn.health.hediffSet.GetRandomNotMissingPart(dinfo.Def, dinfo.Height, BodyPartDepth.Outside, null);
+        }
+
+        protected override void ApplySpecialEffectsToPart(Pawn pawn, float totalDamage, DamageInfo dinfo, DamageWorker.DamageResult result)
+        {
+            if (dinfo.HitPart.depth == BodyPartDepth.Inside)
             {
-                if (this.wickSustainer == null)
+                List<BodyPartRecord> list = new List<BodyPartRecord>();
+                for (BodyPartRecord bodyPartRecord = dinfo.HitPart; bodyPartRecord != null; bodyPartRecord = bodyPartRecord.parent)
                 {
-                    this.StartWickSustainer();
+                    list.Add(bodyPartRecord);
+                    if (bodyPartRecord.depth == BodyPartDepth.Outside)
+                    {
+                        break;
+                    }
+                }
+                float num = (float)(list.Count - 1) + 0.5f;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    DamageInfo dinfo2 = dinfo;
+                    dinfo2.SetHitPart(list[i]);
+                    base.FinalizeAndAddInjury(pawn, totalDamage / num * ((i != 0) ? 1f : 0.5f), dinfo2, result);
+                }
+            }
+            else
+            {
+                int num2 = (this.def.cutExtraTargetsCurve == null) ? 0 : GenMath.RoundRandom(this.def.cutExtraTargetsCurve.Evaluate(Rand.Value));
+                List<BodyPartRecord> list2;
+                if (num2 != 0)
+                {
+                    IEnumerable<BodyPartRecord> enumerable = dinfo.HitPart.GetDirectChildParts();
+                    if (dinfo.HitPart.parent != null)
+                    {
+                        enumerable = enumerable.Concat(dinfo.HitPart.parent);
+                        if (dinfo.HitPart.parent.parent != null)
+                        {
+                            enumerable = enumerable.Concat(dinfo.HitPart.parent.GetDirectChildParts());
+                        }
+                    }
+                    list2 = (from x in enumerable.Except(dinfo.HitPart).InRandomOrder(null).Take(num2)
+                             where !x.def.conceptual
+                             select x).ToList<BodyPartRecord>();
                 }
                 else
                 {
-                    this.wickSustainer.Maintain();
+                    list2 = new List<BodyPartRecord>();
                 }
-                this.ticksToExplode--;
-                if (this.ticksToExplode == 0)
+                list2.Add(dinfo.HitPart);
+                float num3 = totalDamage * (1f + this.def.cutCleaveBonus) / ((float)list2.Count + this.def.cutCleaveBonus);
+                if (num2 == 0)
                 {
-                    IntVec3 randomCell = this.OccupiedRect().RandomCell;
-                    float radius = Rand.Range(0.5f, 1f) * 3f;
-                    GenExplosion.DoExplosion(randomCell, base.Map, radius, DamageDefOf.Flame, null, -1, -1f, null, null, null, null, null, 0f, 1, false, null, 0f, 1, 0f, false);
-                    base.GetComp<CompPowerBattery>().DrawPower(400f);
+                    num3 = base.ReduceDamageToPreserveOutsideParts(num3, dinfo, pawn);
+                }
+                for (int j = 0; j < list2.Count; j++)
+                {
+                    DamageInfo dinfo3 = dinfo;
+                    dinfo3.SetHitPart(list2[j]);
+                    base.FinalizeAndAddInjury(pawn, num3, dinfo3, result);
                 }
             }
-        }
 
-        public override void PostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+        }
+        public override void ExplosionStart(Explosion explosion, List<IntVec3> cellsToAffect)
         {
-            base.PostApplyDamage(dinfo, totalDamageDealt);
-            if (!base.Destroyed && this.ticksToExplode == 0 && dinfo.Def == DamageDefOf.Flame && Rand.Value < 0.05f && base.GetComp<CompPowerBattery>().StoredEnergy > 500f)
+            GenTemperature.PushHeat(explosion.Position, explosion.Map, this.def.explosionHeatEnergyPerCell * (float)cellsToAffect.Count);
+            MoteMaker.MakeStaticMote(explosion.Position, explosion.Map, ThingDefOf.Mote_ExplosionFlash, explosion.radius * 6f);
+            if (explosion.Map == Find.CurrentMap)
             {
-                this.ticksToExplode = Rand.Range(70, 150);
-                this.StartWickSustainer();
+                float magnitude = (explosion.Position.ToVector3Shifted() - Find.Camera.transform.position).magnitude;
+                Find.CameraDriver.shaker.DoShake(4f * explosion.radius / magnitude);
             }
-        }
-
-        private void StartWickSustainer()
-        {
-            SoundInfo info = SoundInfo.InMap(this, MaintenanceType.PerTick);
-            this.wickSustainer = SoundDefOf.HissSmall.TrySpawnSustainer(info);
+            this.ExplosionVisualEffectCenter(explosion);
         }
     }
 }

@@ -4,7 +4,7 @@
 	<ThingDef ParentName="BuildingBase">
 		<defName>ChargeBack_Battery_Prototype</defName>
 		<label>ChargeBack Battery Prototype</label>
-		<description>Stores electricity for later use. Charged batteries explode when exposed to rain or fire.</description>
+		<description>Prototype battery with a Chargeback Technology. When fully activated, it returns energy.</description>
 		<thingClass>EnhancedBattery.Building_ChargeBackBattery</thingClass>
 		<graphicData>
 			<texPath>Things/Building/Power/ChargeBack_Battery_Proto</texPath>
@@ -37,23 +37,21 @@
 		</statBases>
 		<size>(1,2)</size>
 		<costList>
-			<Steel>100</Steel>
-			<ComponentIndustrial>4</ComponentIndustrial>
+			<Steel>80</Steel>
+			<ComponentIndustrial>3</ComponentIndustrial>
 		</costList>
 		<comps>		
-			<li Class="EnhancedBattery.CompProperties_ChargeBackBattery">
+			<li Class="CompProperties_Battery">
 				<compClass>EnhancedBattery.CompChargeBackBatteryPrototype</compClass>
 				<storedEnergyMax>800</storedEnergyMax>
 				<efficiency>0.5</efficiency>
 				<shortCircuitInRain>true</shortCircuitInRain>
 				<transmitsPower>true</transmitsPower>
-				<chargeEfficiency>0.5</chargeEfficiency>
 			</li>			
-			<li Class="EnhancedBattery.CompProperties_ChargeBackPowerPlant">
+			<li Class="CompProperties_Power">
 				<compClass>EnhancedBattery.CompChargeBackPowerPlantPrototype</compClass>
-				<basePowerConsumption>-500</basePowerConsumption>
+				<basePowerConsumption>-200</basePowerConsumption>
 				<transmitsPower>true</transmitsPower>
-				<powerEfficiency>1</powerEfficiency>
 			</li>	
 			<li Class="CompProperties_Breakdownable"/>		
 			<li Class="CompProperties_Flickable" />
@@ -64,7 +62,7 @@
 		<constructEffect>ConstructMetal</constructEffect>
 		<canOverlapZones>false</canOverlapZones>
 		<researchPrerequisites>
-			<li>Batteries</li>
+			<li>ChargeBack_Energy</li>
 		</researchPrerequisites>
 	</ThingDef>
 
@@ -72,7 +70,7 @@
 	<ThingDef ParentName="BuildingBase">
 		<defName>ChargeBack_Battery</defName>
 		<label>ChargeBack Battery</label>
-		<description>Stores electricity for later use. Charged batteries explode when exposed to rain or fire.</description>
+		<description>Battery with stabilized chargeback energy cell. Provides step-by-step energy supply for each active cell.</description>
 		<thingClass>EnhancedBattery.Building_ChargeBackBattery</thingClass>
 		<graphicData>
 			<texPath>Things/Building/Power/ChargeBack_Battery</texPath>
@@ -105,22 +103,22 @@
 		</statBases>
 		<size>(1,2)</size>
 		<costList>
-			<Steel>120</Steel>
-			<ComponentIndustrial>6</ComponentIndustrial>
+			<Steel>60</Steel>
+			<Plasteel>20</Plasteel>
+			<ComponentIndustrial>4</ComponentIndustrial>
 		</costList>
 		<comps>		
-			<li Class="EnhancedBattery.CompProperties_ChargeBackBattery">
+			<li Class="CompProperties_Battery">
 				<compClass>EnhancedBattery.CompChargeBackBatteryPrototype</compClass>
 				<storedEnergyMax>1000</storedEnergyMax>
 				<efficiency>0.5</efficiency>
 				<shortCircuitInRain>true</shortCircuitInRain>
 				<transmitsPower>true</transmitsPower>
 			</li>			
-			<li Class="EnhancedBattery.CompProperties_ChargeBackPowerPlant">
+			<li Class="CompProperties_Power">
 				<compClass>EnhancedBattery.CompChargeBackPowerPlant</compClass>
-				<basePowerConsumption>-1000</basePowerConsumption>
+				<basePowerConsumption>-400</basePowerConsumption>
 				<transmitsPower>true</transmitsPower>
-				<powerEfficiency>0</powerEfficiency>
 			</li>	
 			<li Class="CompProperties_Breakdownable"/>		
 			<li Class="CompProperties_Flickable" />
@@ -131,15 +129,15 @@
 		<constructEffect>ConstructMetal</constructEffect>
 		<canOverlapZones>false</canOverlapZones>
 		<researchPrerequisites>
-			<li>Batteries</li>
+			<li>EnhancedChargeBack_EnergyCell</li>
 		</researchPrerequisites>
 	</ThingDef>
 
 	<!--  SpeedCharge_Battery  -->
 	<ThingDef ParentName="BuildingBase">
 		<defName>SpeedCharge_Battery</defName>
-		<label>SpeedCharge Battery</label>
-		<description>Stores electricity for later use. Charged batteries explode when exposed to rain or fire.</description>
+		<label>Speed Charge Battery</label>
+		<description>It's a fast-charging battery. Efficiency increases when energy is low.</description>
 		<thingClass>EnhancedBattery.Building_SpeedChargeBattery</thingClass>
 		<graphicData>
 			<texPath>Things/Building/Power/SpeedCharge_Battery</texPath>
@@ -172,15 +170,16 @@
 		</statBases>
 		<size>(1,2)</size>
 		<costList>
-			<Steel>120</Steel>
-			<Jade>20</Jade>
-			<ComponentIndustrial>6</ComponentIndustrial>
+			<Steel>60</Steel>
+			<Plasteel>20</Plasteel>
+			<Gold>20</Gold>
+			<ComponentIndustrial>3</ComponentIndustrial>
 		</costList>
 		<comps>		
-			<li Class="EnhancedBattery.CompProperties_ChargeBackBattery">
+			<li Class="CompProperties_Battery">
 				<compClass>EnhancedBattery.CompSpeedChargeBattery</compClass>
 				<storedEnergyMax>2000</storedEnergyMax>
-				<efficiency>1.8</efficiency>
+				<efficiency>1.6</efficiency>
 				<shortCircuitInRain>true</shortCircuitInRain>
 				<transmitsPower>true</transmitsPower>
 			</li>
@@ -193,12 +192,169 @@
 		<constructEffect>ConstructMetal</constructEffect>
 		<canOverlapZones>false</canOverlapZones>
 		<researchPrerequisites>
-			<li>Batteries</li>
+			<li>EnhancedChargeBack_EnergyCell</li>
 		</researchPrerequisites>
 	</ThingDef>
-	<!-- 충전량 N% 마다 발전 효율 증가 (차지백 배터리) -->
-	<!-- 충전량 N%이상이면  합선 방지 (안정화셀 배터리)-->
-	<!-- 충젼량이 낮을때 충전 효율이 낮아지는 전지(급속 충전 전지) -->
+
+	<!--  ResonanceCell_Battery  -->
+	<ThingDef ParentName="BuildingBase">
+		<defName>ResonanceCell_Battery</defName>
+		<label>ResonanceCell Battery</label>
+		<description>Energy cells that generate resonance. If there are resonance cells around, they generate more energy.</description>
+		<thingClass>EnhancedBattery.Building_ChargeBackBattery</thingClass>
+		<graphicData>
+			<texPath>Things/Building/Power/ResonanceCell_Battery</texPath>
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(2,3)</drawSize>
+			<damageData>
+				<cornerTL>Damage/Corner</cornerTL>
+				<cornerTR>Damage/Corner</cornerTR>
+				<cornerBL>Damage/Corner</cornerBL>
+				<cornerBR>Damage/Corner</cornerBR>
+			</damageData>
+		</graphicData>
+		<altitudeLayer>Building</altitudeLayer>
+		<passability>PassThroughOnly</passability>
+		<pathCost>70</pathCost>
+		<blockWind>true</blockWind>
+		<castEdgeShadows>true</castEdgeShadows>
+		<fillPercent>0.40</fillPercent>
+		<tickerType>Normal</tickerType>
+		<minifiedDef>MinifiedThing</minifiedDef>
+		<thingCategories>
+			<li>Artifacts</li>
+		</thingCategories>
+		<statBases>
+			<MaxHitPoints>170</MaxHitPoints>
+			<WorkToBuild>2000</WorkToBuild>
+			<Mass>20</Mass>
+			<Flammability>1.0</Flammability>
+			<Beauty>-10</Beauty>
+		</statBases>
+		<size>(1,2)</size>
+		<costList>
+			<Steel>60</Steel>
+			<Plasteel>20</Plasteel>
+			<Jade>20</Jade>
+			<ComponentIndustrial>4</ComponentIndustrial>
+		</costList>
+		<comps>		
+			<li Class="CompProperties_Battery">
+				<compClass>EnhancedBattery.CompChargeBackBatteryPrototype</compClass>
+				<storedEnergyMax>1200</storedEnergyMax>
+				<efficiency>0.5</efficiency>
+				<shortCircuitInRain>true</shortCircuitInRain>
+				<transmitsPower>true</transmitsPower>
+			</li>
+			<li Class="EnhancedBattery.CompPropertie_ResonancePowerPlant">
+				<compClass>EnhancedBattery.CompResonancePowerPlant</compClass>
+				<basePowerConsumption>-200</basePowerConsumption>
+				<transmitsPower>true</transmitsPower>
+				<additionalEfficiency>0.2</additionalEfficiency>
+				<range>2.9</range>
+			</li>
+			<li Class="CompProperties_Breakdownable"/>		
+			<li Class="CompProperties_Flickable" />
+			<li Class="CompProperties_Explosive">
+				<explosiveRadius>6</explosiveRadius>
+				<explosiveDamageType>Bomb</explosiveDamageType>
+			</li>
+		</comps>
+		<terrainAffordanceNeeded>Medium</terrainAffordanceNeeded>
+		<designationCategory>Power</designationCategory>
+		<staticSunShadowHeight>0.2</staticSunShadowHeight>
+		<constructEffect>ConstructMetal</constructEffect>
+		<canOverlapZones>false</canOverlapZones>
+		<researchPrerequisites>
+			<li>Resonance_EnergyCell</li>
+		</researchPrerequisites>
+		<placeWorkers>
+			<li>EnhancedBattery.PlaceWorker_ShowResonanceLink</li>
+		</placeWorkers>
+		<tradeTags>
+			<li>Artifact</li>
+			<li>ExoticMisc</li>
+		</tradeTags>
+		<tradeability>All</tradeability>
+	</ThingDef>
+
+	<!--  VoidCell_Battery  -->
+	<ThingDef ParentName="BuildingBase">
+		<defName>VoidCell_Battery</defName>
+		<label>VoidCell Battery</label>
+		<description>Unknown battery that takes energy from the void. When the amount of energy is low, it generates and charges itself.It's tightly sealed and doesn't worry about rain.But it looks extremely unstable, so handle with care.</description>
+		<thingClass>EnhancedBattery.Building_SpeedChargeBattery</thingClass>
+		<graphicData>
+			<texPath>Things/Building/Power/VoidCell_Battery</texPath>
+			<graphicClass>Graphic_Multi</graphicClass>
+			<drawSize>(2,3)</drawSize>
+			<damageData>
+				<cornerTL>Damage/Corner</cornerTL>
+				<cornerTR>Damage/Corner</cornerTR>
+				<cornerBL>Damage/Corner</cornerBL>
+				<cornerBR>Damage/Corner</cornerBR>
+			</damageData>
+		</graphicData>
+		<altitudeLayer>Building</altitudeLayer>
+		<passability>PassThroughOnly</passability>
+		<pathCost>70</pathCost>
+		<blockWind>true</blockWind>
+		<castEdgeShadows>true</castEdgeShadows>
+		<fillPercent>0.40</fillPercent>
+		<tickerType>Normal</tickerType>
+		<minifiedDef>MinifiedThing</minifiedDef>
+		<thingCategories>
+			<li>Artifacts</li>
+		</thingCategories>
+		<statBases>
+			<MarketValue>3000</MarketValue>
+			<MaxHitPoints>150</MaxHitPoints>
+			<Flammability>0.2</Flammability>
+			<Beauty>-10</Beauty>
+			<Mass>10</Mass>
+			<WorkToBuild>8000</WorkToBuild>
+		</statBases>
+		<size>(1,2)</size>
+		<costList>
+			<Plasteel>100</Plasteel>
+			<Gold>150</Gold>
+			<Uranium>300</Uranium>
+			<Jade>60</Jade>
+			<ComponentSpacer>4</ComponentSpacer>
+		</costList>
+		<comps>		
+			<li Class="CompProperties_Battery">
+				<compClass>EnhancedBattery.CompSpeedChargeBattery</compClass>
+				<storedEnergyMax>2000</storedEnergyMax>
+				<efficiency>1.5</efficiency>
+				<shortCircuitInRain>false</shortCircuitInRain>
+				<transmitsPower>true</transmitsPower>
+			</li>
+			<li Class="CompProperties_Power">
+				<compClass>EnhancedBattery.CompSpeedChargeBackPowerPlant</compClass>
+				<basePowerConsumption>-1000</basePowerConsumption>
+				<transmitsPower>true</transmitsPower>
+			</li>	
+			<li Class="CompProperties_Breakdownable"/>		
+			<li Class="CompProperties_Flickable" />
+			<li Class="CompProperties_Explosive">
+				<explosiveRadius>12</explosiveRadius>
+				<explosiveDamageType>Void</explosiveDamageType>
+			</li>
+		</comps>
+		<terrainAffordanceNeeded>Medium</terrainAffordanceNeeded>
+		<staticSunShadowHeight>0.2</staticSunShadowHeight>
+		<constructEffect>ConstructMetal</constructEffect>
+		<canOverlapZones>false</canOverlapZones>
+		<tradeTags>
+			<li>Artifact</li>
+			<li>ExoticMisc</li>
+		</tradeTags>
+		<tradeability>All</tradeability>
+	</ThingDef>
+
+
+	<!-- 충전량 완충마다 충전량이 증가하는 방지 (안정화셀 배터리)-->
 	<!-- 온도를 흡수하여 충전하는 셀 -->
 	<!-- 풀차징시 온도를 방열하는 셀 -->
 
