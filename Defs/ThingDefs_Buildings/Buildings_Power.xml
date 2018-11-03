@@ -319,7 +319,7 @@
 			<Plasteel>100</Plasteel>
 			<Gold>150</Gold>
 			<Uranium>300</Uranium>
-			<Jade>60</Jade>
+			<Jade>100</Jade>
 			<ComponentSpacer>4</ComponentSpacer>
 		</costList>
 		<comps>		
