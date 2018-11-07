@@ -178,7 +178,7 @@
 		<comps>		
 			<li Class="CompProperties_Battery">
 				<compClass>EnhancedBattery.CompSpeedChargeBattery</compClass>
-				<storedEnergyMax>2000</storedEnergyMax>
+				<storedEnergyMax>1500</storedEnergyMax>
 				<efficiency>1.6</efficiency>
 				<shortCircuitInRain>true</shortCircuitInRain>
 				<transmitsPower>true</transmitsPower>
@@ -241,7 +241,7 @@
 		<comps>		
 			<li Class="CompProperties_Battery">
 				<compClass>EnhancedBattery.CompChargeBackBatteryPrototype</compClass>
-				<storedEnergyMax>1200</storedEnergyMax>
+				<storedEnergyMax>1000</storedEnergyMax>
 				<efficiency>0.5</efficiency>
 				<shortCircuitInRain>true</shortCircuitInRain>
 				<transmitsPower>true</transmitsPower>
@@ -250,15 +250,11 @@
 				<compClass>EnhancedBattery.CompResonancePowerPlant</compClass>
 				<basePowerConsumption>-200</basePowerConsumption>
 				<transmitsPower>true</transmitsPower>
-				<additionalEfficiency>0.2</additionalEfficiency>
-				<range>2.9</range>
+				<additionalEfficiency>0.15</additionalEfficiency>
+				<range>2.8</range>
 			</li>
 			<li Class="CompProperties_Breakdownable"/>		
 			<li Class="CompProperties_Flickable" />
-			<li Class="CompProperties_Explosive">
-				<explosiveRadius>6</explosiveRadius>
-				<explosiveDamageType>Bomb</explosiveDamageType>
-			</li>
 		</comps>
 		<terrainAffordanceNeeded>Medium</terrainAffordanceNeeded>
 		<designationCategory>Power</designationCategory>
