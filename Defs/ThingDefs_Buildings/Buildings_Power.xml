@@ -300,6 +300,7 @@
 		<tickerType>Normal</tickerType>
 		<minifiedDef>MinifiedThing</minifiedDef>
 		<thingCategories>
+			<li>BuildingsPower</li>
 			<li>Artifacts</li>
 		</thingCategories>
 		<statBases>

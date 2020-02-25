@@ -640,7 +640,7 @@ namespace EnhancedBattery
             return pawn.health.hediffSet.GetRandomNotMissingPart(dinfo.Def, dinfo.Height, BodyPartDepth.Outside, null);
         }
 
-        protected override void ApplySpecialEffectsToPart(Pawn pawn, float totalDamage, DamageInfo dinfo, DamageWorker.DamageResult result)
+        protected override void ApplySpecialEffectsToPart(Pawn pawn, float totalDamage, DamageInfo dinfo, DamageResult result)
         {
             if (dinfo.HitPart.depth == BodyPartDepth.Inside)
             {
@@ -663,7 +663,7 @@ namespace EnhancedBattery
             }
             else
             {
-                int num2 = (this.def.cutExtraTargetsCurve == null) ? 0 : GenMath.RoundRandom(this.def.cutExtraTargetsCurve.Evaluate(Rand.Value));
+                int num2 = (def.cutExtraTargetsCurve == null) ? 0 : GenMath.RoundRandom(def.cutExtraTargetsCurve.Evaluate(Rand.Value));
                 List<BodyPartRecord> list2;
                 if (num2 != 0)
                 {
@@ -678,14 +678,14 @@ namespace EnhancedBattery
                     }
                     list2 = (from x in enumerable.Except(dinfo.HitPart).InRandomOrder(null).Take(num2)
                              where !x.def.conceptual
-                             select x).ToList<BodyPartRecord>();
+                             select x).ToList();
                 }
                 else
                 {
                     list2 = new List<BodyPartRecord>();
                 }
                 list2.Add(dinfo.HitPart);
-                float num3 = totalDamage * (1f + this.def.cutCleaveBonus) / ((float)list2.Count + this.def.cutCleaveBonus);
+                float num3 = totalDamage * (1f + def.cutCleaveBonus) / (list2.Count + def.cutCleaveBonus);
                 if (num2 == 0)
                 {
                     num3 = base.ReduceDamageToPreserveOutsideParts(num3, dinfo, pawn);
@@ -701,14 +701,14 @@ namespace EnhancedBattery
         }
         public override void ExplosionStart(Explosion explosion, List<IntVec3> cellsToAffect)
         {
-            GenTemperature.PushHeat(explosion.Position, explosion.Map, this.def.explosionHeatEnergyPerCell * (float)cellsToAffect.Count);
+            GenTemperature.PushHeat(explosion.Position, explosion.Map, def.explosionHeatEnergyPerCell * cellsToAffect.Count);
             MoteMaker.MakeStaticMote(explosion.Position, explosion.Map, ThingDefOf.Mote_ExplosionFlash, explosion.radius * 6f);
             if (explosion.Map == Find.CurrentMap)
             {
                 float magnitude = (explosion.Position.ToVector3Shifted() - Find.Camera.transform.position).magnitude;
                 Find.CameraDriver.shaker.DoShake(4f * explosion.radius / magnitude);
             }
-            this.ExplosionVisualEffectCenter(explosion);
+            ExplosionVisualEffectCenter(explosion);
         }
     }
 }
